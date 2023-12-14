@@ -1,4 +1,7 @@
-﻿List<string> lines = new();
+﻿using System.Text;
+using System.Transactions;
+
+List<string> lines = new();
 using (StreamReader reader = new(args[0]))
 {
     while (!reader.EndOfStream)
@@ -7,13 +10,10 @@ using (StreamReader reader = new(args[0]))
     }
 }
 
-const int letRocksSettleFor = 200;
-const int maxCycleDetect = 100;
 const int iterations = 1_000_000_000;
 
 solve(false);
 solve(true);
-
 void solve(bool part2)
 {
     List<List<char>> map = new();
@@ -28,46 +28,27 @@ void solve(bool part2)
 
     if (part2)
     {
-        int cycleConfidence = 0;
-        int potentialCycle = -1;
-        int[] cycleDetector = new int[maxCycleDetect];
-
+        Dictionary<string, int> rockFormations = new();
         for (int iteration = 1; iteration <= iterations; iteration++)
         {
+            StringBuilder sb = new();
+            foreach(var line in map)
+                foreach(char c in line)
+                    sb.Append(c);
+            string formationString = sb.ToString();
+            if (rockFormations.ContainsKey(formationString))
+            {
+                int cycle = iteration - rockFormations[formationString];
+                int moveForward = cycle * ((iterations - iteration) / cycle);
+                iteration += moveForward;
+            }
+            rockFormations[formationString] = iteration;
             moveRocks(ref map, Cardinal.N);
             moveRocks(ref map, Cardinal.W);
             moveRocks(ref map, Cardinal.S);
             moveRocks(ref map, Cardinal.E);
-            if (iteration >= letRocksSettleFor && iteration < letRocksSettleFor + maxCycleDetect)
-            {
-                int curr = totalLoad(map);
-                cycleDetector[iteration - letRocksSettleFor] = curr;
-                if (potentialCycle > 0)
-                {
-                    if (curr == cycleDetector[iteration - letRocksSettleFor - potentialCycle])
-                        cycleConfidence++;
-                    else
-                        potentialCycle = -1;//false positive, find another one
-                }
-                if (cycleConfidence == potentialCycle)
-                {
-                    //ladies and gentlemen, we got him - just skip to end
-                    while (iteration <= iterations)
-                        iteration += potentialCycle;
-                    iteration -= potentialCycle;//give room for the last couple
-                }
-                if (iteration - letRocksSettleFor > 0)
-                    if (curr == cycleDetector[0])
-                        potentialCycle = iteration - letRocksSettleFor;
-            }
-            else if(iteration > letRocksSettleFor+maxCycleDetect)
-            {
-                if (potentialCycle < 0)
-                    throw new Exception("No cycle found, increase the settle rocks or cycle detect or give up");
-                else if (iteration == iterations)
-                    Console.WriteLine($"part2: \t\t{totalLoad(map)}");
-            }
         }
+        Console.WriteLine($"part2: \t\t{totalLoad(map)}");
     }
     else //part1
     {
