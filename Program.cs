@@ -1,5 +1,7 @@
 ﻿using System.Text;
+using System.Threading.Channels;
 using System.Transactions;
+using static System.Net.Mime.MediaTypeNames;
 
 List<string> lines = new();
 using (StreamReader reader = new(args[0]))
@@ -59,35 +61,32 @@ void solve(bool part2)
 }
 void moveRocks(ref List<List<char>> map,Cardinal dirrection)
 {
-    //north, then west, then south, then east
-    int iMove = 0;
-    int jMove = 0;
-    switch (dirrection)
-    {
-        case Cardinal.N: iMove--; break;
-        case Cardinal.S: iMove++; break;
-        case Cardinal.W: jMove--; break;
-        case Cardinal.E: jMove++; break;
-    }
+    bool traverseRows = (int)dirrection>=2;//traverse Rows or Cols
+    bool forward = (int)dirrection%2==1;//traverse forwards or backwards
+
+    int xMax = traverseRows ? map.Count : map[0].Count;
+    int yMax = traverseRows ? map[0].Count : map.Count;
+
     bool changed;
     do
     {
         changed = false;
-        for (int i = 0; i < map.Count; i++)
+        for (int x = 0; x < xMax; x++)
         {
-            if (i + iMove < 0 || i + iMove >= map.Count) continue;
-            for (int j = 0; j < map[i].Count; j++)
+            for (int y = 0; y+1 < yMax; y++)
             {
-                if(j + jMove < 0 || j + jMove >= map[i].Count) continue;
-                if (map[i][j] == 'O' && map[i + iMove][j + jMove] == '.')
+                int i = traverseRows ? forward ? x : xMax - x - 1 : forward ? y : yMax - y - 1;
+                int j = traverseRows ? forward ? y : yMax - y - 1 : forward ? x : xMax - x - 1;
+                int i2 = traverseRows ? forward ? x : xMax - x - 1 : forward ? y + 1 : yMax - (y + 1) - 1;
+                int j2 = traverseRows ? forward ? y + 1 : yMax - (y + 1) - 1 : forward ? x : xMax - x - 1;
+                if (map[i][j] == 'O' && map[i2][j2] == '.')
                 {
                     map[i][j] = '.';
-                    map[i + iMove][j + jMove] = 'O';
+                    map[i2][j2] = 'O';
                     changed = true;
                 }
             }
         }
-
     } while (changed);
 }
 
@@ -104,5 +103,11 @@ int totalLoad(in List<List<char>> map)
     }
     return curr;
 }
-enum Cardinal { N, S, W, E }
+enum Cardinal
+{
+    N = 0,
+    S = 1,
+    W = 2,
+    E = 3,
+}
 
