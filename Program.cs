@@ -22,13 +22,13 @@ Console.WriteLine($"part2:\t\ttime:{sw.ElapsedMilliseconds}ms");
 
 void solve(bool part2)
 {
-    List<List<char>> map = new();
-    foreach (string line in lines)
+    char[][] map = new char[lines.Count][];
+    for (int i = 0; i < lines.Count; i++)
     {
-        map.Add(new());
-        foreach (char c in line)
+        map[i] = new char[lines[i].Length];
+        for (int j = 0; j < lines[i].Length; j++)
         {
-            map.Last().Add(c);   
+            map[i][j]= lines[i][j];
         }
     }
 
@@ -39,8 +39,7 @@ void solve(bool part2)
         {
             StringBuilder sb = new();
             foreach(var line in map)
-                foreach(char c in line)
-                    sb.Append(c);
+                    sb.Append(line);
             string formationString = sb.ToString();
             if (rockFormations.ContainsKey(formationString))
             {
@@ -49,10 +48,10 @@ void solve(bool part2)
                 iteration += moveForward;
             }
             rockFormations[formationString] = iteration;
-            moveRocksBetter(ref map, Cardinal.N);
-            moveRocksBetter(ref map, Cardinal.W);
-            moveRocksBetter(ref map, Cardinal.S);
-            moveRocksBetter(ref map, Cardinal.E);
+            moveRocks(ref map, Cardinal.N);
+            moveRocks(ref map, Cardinal.W);
+            moveRocks(ref map, Cardinal.S);
+            moveRocks(ref map, Cardinal.E);
         }
         Console.WriteLine($"part2: \t\t{totalLoad(map)}");
     }
@@ -63,44 +62,14 @@ void solve(bool part2)
     }
 
 }
-void moveRocks(ref List<List<char>> map,Cardinal dirrection)
-{
-    bool traverseRows = (int)dirrection>=2;//traverse Rows or Cols
-    bool forward = (int)dirrection%2==1;//traverse forwards or backwards
 
-    int xMax = traverseRows ? map.Count : map[0].Count;
-    int yMax = traverseRows ? map[0].Count : map.Count;
-
-    bool changed;
-    do
-    {
-        changed = false;
-        for (int x = 0; x < xMax; x++)
-        {
-            for (int y = 0; y+1 < yMax; y++)
-            {
-                int i = traverseRows ? forward ? x : xMax - x - 1 : forward ? y : yMax - y - 1;
-                int j = traverseRows ? forward ? y : yMax - y - 1 : forward ? x : xMax - x - 1;
-                int i2 = traverseRows ? forward ? x : xMax - x - 1 : forward ? y + 1 : yMax - (y + 1) - 1;
-                int j2 = traverseRows ? forward ? y + 1 : yMax - (y + 1) - 1 : forward ? x : xMax - x - 1;
-                if (map[i][j] == 'O' && map[i2][j2] == '.')
-                {
-                    map[i][j] = '.';
-                    map[i2][j2] = 'O';
-                    changed = true;
-                }
-            }
-        }
-    } while (changed);
-}
-
-void moveRocksBetter(ref List<List<char>> map, Cardinal dirrection)
+void moveRocks(ref char[][]map, Cardinal dirrection)
 {
     bool traverseRows = (int)dirrection >= 2;//traverse Rows or Cols
     bool forward = (int)dirrection % 2 == 1;//traverse forwards or backwards
 
-    int xMax = traverseRows ? map.Count : map[0].Count;
-    int yMax = traverseRows ? map[0].Count : map.Count;
+    int xMax = traverseRows ? map.Length : map[0].Length;
+    int yMax = traverseRows ? map[0].Length : map.Length;
 
     for (int x = 0; x < xMax; x++)
     {
@@ -129,15 +98,15 @@ void moveRocksBetter(ref List<List<char>> map, Cardinal dirrection)
     }
 }
 
-int totalLoad(in List<List<char>> map)
+int totalLoad(in char[][] map)
 {
     int curr = 0;
-    for (int i = 0; i < map.Count; i++)
+    for (int i = 0; i < map.Length; i++)
     {
-        for (int j = 0; j < map[i].Count; j++)
+        for (int j = 0; j < map[i].Length; j++)
         {
             if (map[i][j] == 'O')
-                curr += map.Count - i;
+                curr += map.Length - i;
         }
     }
     return curr;
