@@ -55,7 +55,6 @@ void solve(bool part2)
                     while (iteration <= iterations)
                         iteration += potentialCycle;
                     iteration -= potentialCycle;//give room for the last couple
-                    iteration -= potentialCycle;//give room for the last couple
                 }
                 if (iteration - letRocksSettleFor > 0)
                     if (curr == cycleDetector[0])
