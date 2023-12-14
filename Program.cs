@@ -13,14 +13,19 @@ using (StreamReader reader = new(args[0]))
 
 
 Stopwatch sw = Stopwatch.StartNew();
-solve(false);
+int p1 = solve(false);
+sw.Stop();
 Console.WriteLine($"part1:\t\ttime:{sw.ElapsedMilliseconds}ms");
 
 sw.Restart();
-solve(true);
+int p2 = solve(true);
+sw.Stop();
 Console.WriteLine($"part2:\t\ttime:{sw.ElapsedMilliseconds}ms");
 
-void solve(bool part2)
+Console.WriteLine($"part1: \t\t{p1}");
+Console.WriteLine($"part2: \t\t{p2}");
+
+int solve(bool part2)
 {
     char[][] map = new char[lines.Count][];
     for (int i = 0; i < lines.Count; i++)
@@ -53,14 +58,10 @@ void solve(bool part2)
             moveRocks(ref map, Cardinal.S);
             moveRocks(ref map, Cardinal.E);
         }
-        Console.WriteLine($"part2: \t\t{totalLoad(map)}");
     }
     else //part1
-    {
         moveRocks(ref map, Cardinal.N);
-        Console.WriteLine($"part1: \t\t{totalLoad(map)}");
-    }
-
+    return totalLoad(map);
 }
 
 void moveRocks(ref char[][]map, Cardinal dirrection)
