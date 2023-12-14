@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
-
+Stopwatch sw = Stopwatch.StartNew();
 const int part2desiredIterations = 1_000_000_000;
 List<string> lines = new();
 using (StreamReader reader = new(args[0]))
@@ -10,9 +10,10 @@ using (StreamReader reader = new(args[0]))
         lines.Add(reader.ReadLine());
     }
 }
+sw.Stop();
+Console.WriteLine($"read:\t\ttime:{sw.ElapsedMilliseconds}ms");
 
-
-Stopwatch sw = Stopwatch.StartNew();
+sw.Restart();
 int p1 = solve(false);
 sw.Stop();
 Console.WriteLine($"part1:\t\ttime:{sw.ElapsedMilliseconds}ms");
@@ -22,6 +23,7 @@ int p2 = solve(true);
 sw.Stop();
 Console.WriteLine($"part2:\t\ttime:{sw.ElapsedMilliseconds}ms");
 
+Console.WriteLine();
 Console.WriteLine($"part1: \t\t{p1}");
 Console.WriteLine($"part2: \t\t{p2}");
 
