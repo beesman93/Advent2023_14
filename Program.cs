@@ -53,6 +53,8 @@ int solve(bool part2)
                 int cycle = iteration - rockFormations[formationString];
                 int moveForward = cycle * ((part2desiredIterations - iteration) / cycle);
                 iteration += moveForward;
+                int lookBack = part2desiredIterations - iteration;
+                return totalLoadFS(rockFormations.ElementAt(rockFormations.Count - lookBack).Key,map.Length);
             }
             rockFormations[formationString] = iteration;
             moveRocks(ref map, Cardinal.N);
@@ -113,6 +115,20 @@ int totalLoad(in char[][] map)
         }
     }
     return curr;
+}
+int totalLoadFS(string formationString, int lines)
+{
+    char[][] map = new char[lines][];
+    int curr = 0;
+    for (int i = 0; i < lines; i++)
+    {
+        map[i] = new char[formationString.Length / lines];
+        for (int j = 0; j < formationString.Length/lines; j++)
+        {
+            map[i][j] = formationString[(i* formationString.Length / lines) +j];
+        }
+    }
+    return totalLoad(map);
 }
 enum Cardinal
 {
