@@ -1,8 +1,7 @@
-﻿using System.Text;
-using System.Threading.Channels;
-using System.Transactions;
-using static System.Net.Mime.MediaTypeNames;
+﻿using System.Diagnostics;
+using System.Text;
 
+const int part2desiredIterations = 1_000_000_000;
 List<string> lines = new();
 using (StreamReader reader = new(args[0]))
 {
@@ -12,10 +11,15 @@ using (StreamReader reader = new(args[0]))
     }
 }
 
-const int iterations = 1_000_000_000;
 
+Stopwatch sw = Stopwatch.StartNew();
 solve(false);
+Console.WriteLine($"part1:\t\ttime:{sw.ElapsedMilliseconds}ms");
+
+sw.Restart();
 solve(true);
+Console.WriteLine($"part2:\t\ttime:{sw.ElapsedMilliseconds}ms");
+
 void solve(bool part2)
 {
     List<List<char>> map = new();
@@ -31,7 +35,7 @@ void solve(bool part2)
     if (part2)
     {
         Dictionary<string, int> rockFormations = new();
-        for (int iteration = 1; iteration <= iterations; iteration++)
+        for (int iteration = 1; iteration <= part2desiredIterations; iteration++)
         {
             StringBuilder sb = new();
             foreach(var line in map)
@@ -41,14 +45,14 @@ void solve(bool part2)
             if (rockFormations.ContainsKey(formationString))
             {
                 int cycle = iteration - rockFormations[formationString];
-                int moveForward = cycle * ((iterations - iteration) / cycle);
+                int moveForward = cycle * ((part2desiredIterations - iteration) / cycle);
                 iteration += moveForward;
             }
             rockFormations[formationString] = iteration;
-            moveRocks(ref map, Cardinal.N);
-            moveRocks(ref map, Cardinal.W);
-            moveRocks(ref map, Cardinal.S);
-            moveRocks(ref map, Cardinal.E);
+            moveRocksBetter(ref map, Cardinal.N);
+            moveRocksBetter(ref map, Cardinal.W);
+            moveRocksBetter(ref map, Cardinal.S);
+            moveRocksBetter(ref map, Cardinal.E);
         }
         Console.WriteLine($"part2: \t\t{totalLoad(map)}");
     }
@@ -88,6 +92,41 @@ void moveRocks(ref List<List<char>> map,Cardinal dirrection)
             }
         }
     } while (changed);
+}
+
+void moveRocksBetter(ref List<List<char>> map, Cardinal dirrection)
+{
+    bool traverseRows = (int)dirrection >= 2;//traverse Rows or Cols
+    bool forward = (int)dirrection % 2 == 1;//traverse forwards or backwards
+
+    int xMax = traverseRows ? map.Count : map[0].Count;
+    int yMax = traverseRows ? map[0].Count : map.Count;
+
+    for (int x = 0; x < xMax; x++)
+    {
+        int boulderCount = 0;
+        Stack<Tuple<int, int>> visited = new();
+        for (int y = 0; y <= yMax; y++)
+        {
+            int i = traverseRows ? forward ? x : xMax - x - 1 : forward ? y : yMax - y - 1;
+            int j = traverseRows ? forward ? y : yMax - y - 1 : forward ? x : xMax - x - 1;
+            visited.Push(new(i, j));
+            switch (y==yMax?'#':map[i][j])
+            {
+                case 'O':
+                    map[i][j] = '.';
+                    boulderCount++;
+                    break;
+                case '.':
+                    break;
+                case '#':
+                    visited.Pop();
+                    for (; boulderCount > 0;--boulderCount)
+                        map[visited.Peek().Item1][visited.Pop().Item2] = 'O';
+                    break;
+            }
+        }
+    }
 }
 
 int totalLoad(in List<List<char>> map)
