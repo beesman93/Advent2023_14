@@ -41,7 +41,7 @@ int solve(bool part2)
 
     if (part2)
     {
-        Dictionary<string, int> rockFormations = new();
+        Dictionary<string, Tuple<int,int>> rockFormations = new();
         for (int iteration = 1; iteration <= part2desiredIterations; iteration++)
         {
             StringBuilder sb = new();
@@ -50,13 +50,13 @@ int solve(bool part2)
             string formationString = sb.ToString();
             if (rockFormations.ContainsKey(formationString))
             {
-                int cycle = iteration - rockFormations[formationString];
+                int cycle = iteration - rockFormations[formationString].Item1;
                 int moveForward = cycle * ((part2desiredIterations - iteration) / cycle);
                 iteration += moveForward;
                 int lookBack = part2desiredIterations - iteration;
-                return totalLoadFS(rockFormations.ElementAt(rockFormations.Count - lookBack).Key,map.Length);
+                return rockFormations.ElementAt(rockFormations.Count - lookBack).Value.Item2;
             }
-            rockFormations[formationString] = iteration;
+            rockFormations[formationString] = new(iteration,totalLoad(map));
             moveRocks(ref map, Cardinal.N);
             moveRocks(ref map, Cardinal.W);
             moveRocks(ref map, Cardinal.S);
@@ -115,20 +115,6 @@ int totalLoad(in char[][] map)
         }
     }
     return curr;
-}
-int totalLoadFS(string formationString, int lines)
-{
-    char[][] map = new char[lines][];
-    int curr = 0;
-    for (int i = 0; i < lines; i++)
-    {
-        map[i] = new char[formationString.Length / lines];
-        for (int j = 0; j < formationString.Length/lines; j++)
-        {
-            map[i][j] = formationString[(i* formationString.Length / lines) +j];
-        }
-    }
-    return totalLoad(map);
 }
 enum Cardinal
 {
