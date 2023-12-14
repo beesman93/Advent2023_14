@@ -1,6 +1,7 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.VisualBasic;
+using System.Diagnostics;
 using System.Text;
-Stopwatch sw = Stopwatch.StartNew();
+//Stopwatch sw = Stopwatch.StartNew();
 const int part2desiredIterations = 1_000_000_000;
 List<string> lines = new();
 using (StreamReader reader = new(args[0]))
@@ -10,22 +11,24 @@ using (StreamReader reader = new(args[0]))
         lines.Add(reader.ReadLine());
     }
 }
-sw.Stop();
-Console.WriteLine($"read:\t\ttime:{sw.ElapsedMilliseconds}ms");
+//sw.Stop();
+//Console.WriteLine($"read:\t\ttime:{sw.ElapsedMilliseconds}ms");
 
-sw.Restart();
-int p1 = solve(false);
-sw.Stop();
-Console.WriteLine($"part1:\t\ttime:{sw.ElapsedMilliseconds}ms");
+//sw.Restart();
+//int p1 = solve(false);
+//sw.Stop();
+//Console.WriteLine($"part1:\t\ttime:{sw.ElapsedMilliseconds}ms");
 
-sw.Restart();
+//sw.Restart();
+Console.Clear();
+Thread.Sleep(5000);
 int p2 = solve(true);
-sw.Stop();
-Console.WriteLine($"part2:\t\ttime:{sw.ElapsedMilliseconds}ms");
+//sw.Stop();
+//Console.WriteLine($"part2:\t\ttime:{sw.ElapsedMilliseconds}ms");
 
-Console.WriteLine();
-Console.WriteLine($"part1: \t\t{p1}");
-Console.WriteLine($"part2: \t\t{p2}");
+//Console.WriteLine();
+//Console.WriteLine($"part1: \t\t{p1}");
+Console.WriteLine($"solution: \t\t{p2}");
 
 int solve(bool part2)
 {
@@ -42,6 +45,7 @@ int solve(bool part2)
     if (part2)
     {
         Dictionary<string, int> rockFormations = new();
+        visualizeRocksAndMove(ref map, Cardinal.V, 0);
         for (int iteration = 1; iteration <= part2desiredIterations; iteration++)
         {
             StringBuilder sb = new();
@@ -55,10 +59,10 @@ int solve(bool part2)
                 iteration += moveForward;
             }
             rockFormations[formationString] = iteration;
-            moveRocks(ref map, Cardinal.N);
-            moveRocks(ref map, Cardinal.W);
-            moveRocks(ref map, Cardinal.S);
-            moveRocks(ref map, Cardinal.E);
+            visualizeRocksAndMove(ref map, Cardinal.N, iteration);
+            visualizeRocksAndMove(ref map, Cardinal.W, iteration);
+            visualizeRocksAndMove(ref map, Cardinal.S, iteration);
+            visualizeRocksAndMove(ref map, Cardinal.E, iteration);
         }
     }
     else //part1
@@ -100,6 +104,33 @@ void moveRocks(ref char[][]map, Cardinal dirrection)
         }
     }
 }
+void visualizeRocksAndMove(ref char[][] map, Cardinal dirrection, int iteration)
+{
+    if(dirrection!=Cardinal.V)
+        moveRocks(ref map, dirrection);
+    Console.SetCursorPosition(0, 0);
+    for (int i = -1; i <= map.Length; i++)
+    {
+        for (int j = -1; j <= map[0].Length; j++)
+        {
+            if ((i < 0 || i == map.Length) && (j < 0 || j == map[0].Length))
+                Console.Write('+');
+            else if (i < 0 || i == map.Length)
+                Console.Write('-');
+            else if (j < 0 || j == map[0].Length)
+                Console.Write('|');
+            else
+            {
+                char c = map[i][j];
+                if (c == '.') c = ' ';
+                else if (c == '#') c = '|';
+                Console.Write(c);
+            }
+        }
+        Console.WriteLine();
+    }
+    Console.Write($"iteration:{iteration} {dirrection.ToString()}\t");
+}
 
 int totalLoad(in char[][] map)
 {
@@ -120,5 +151,6 @@ enum Cardinal
     S = 1,
     W = 2,
     E = 3,
+    V = 8,//visualize only
 }
 
