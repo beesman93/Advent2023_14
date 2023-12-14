@@ -11,6 +11,7 @@ using (StreamReader reader = new(args[0]))
         lines.Add(reader.ReadLine());
     }
 }
+string previousFormationE = "";
 //sw.Stop();
 //Console.WriteLine($"read:\t\ttime:{sw.ElapsedMilliseconds}ms");
 
@@ -29,7 +30,7 @@ int p2 = solve(true);
 //Console.WriteLine();
 //Console.WriteLine($"part1: \t\t{p1}");
 Console.WriteLine($"solution: \t\t{p2}");
-
+Console.ReadLine();
 int solve(bool part2)
 {
     char[][] map = new char[lines.Count][];
@@ -59,9 +60,9 @@ int solve(bool part2)
                 iteration += moveForward;
             }
             rockFormations[formationString] = iteration;
-            visualizeRocksAndMove(ref map, Cardinal.N, iteration);
-            visualizeRocksAndMove(ref map, Cardinal.W, iteration);
-            visualizeRocksAndMove(ref map, Cardinal.S, iteration);
+            moveRocks(ref map, Cardinal.N);
+            moveRocks(ref map, Cardinal.W);
+            moveRocks(ref map, Cardinal.S);
             visualizeRocksAndMove(ref map, Cardinal.E, iteration);
         }
     }
@@ -106,30 +107,62 @@ void moveRocks(ref char[][]map, Cardinal dirrection)
 }
 void visualizeRocksAndMove(ref char[][] map, Cardinal dirrection, int iteration)
 {
-    if(dirrection!=Cardinal.V)
-        moveRocks(ref map, dirrection);
     Console.SetCursorPosition(0, 0);
-    for (int i = -1; i <= map.Length; i++)
+    Console.WriteLine($"iteration:{iteration} {dirrection.ToString()}\t");
+    if (dirrection!=Cardinal.V)
+        moveRocks(ref map, dirrection);
+    
+
+    StringBuilder sb = new();
+    foreach (var line in map)
+        sb.Append(line);
+    string formationString = sb.ToString();
+    if (iteration <2)
     {
-        for (int j = -1; j <= map[0].Length; j++)
+        for (int i = -1; i <= map.Length; i++)
         {
-            if ((i < 0 || i == map.Length) && (j < 0 || j == map[0].Length))
-                Console.Write('+');
-            else if (i < 0 || i == map.Length)
-                Console.Write('-');
-            else if (j < 0 || j == map[0].Length)
-                Console.Write('|');
-            else
+            for (int j = -1; j <= map[0].Length; j++)
             {
-                char c = map[i][j];
-                if (c == '.') c = ' ';
-                else if (c == '#') c = '|';
-                Console.Write(c);
+                if ((i < 0 || i == map.Length) && (j < 0 || j == map[0].Length))
+                    Console.Write('+');
+                else if (i < 0 || i == map.Length)
+                    Console.Write('-');
+                else if (j < 0 || j == map[0].Length)
+                    Console.Write('|');
+                else
+                {
+                    char c = map[i][j];
+                    if (c == '.') c = ' ';
+                    else if (c == '#') c = '|';
+                    Console.Write(c);
+                }
+            }
+            Console.WriteLine();
+        }
+    }
+    else
+    {
+        Thread.Sleep(50);
+        Console.ForegroundColor = ConsoleColor.Blue;
+        for (int i = 0; i < map.Length; i++)
+        {
+            for (int j = 0; j < map[0].Length; j++)
+            {
+                if (formationString[i * map.Length + j] != previousFormationE[i * map.Length + j])
+                {
+                    Console.SetCursorPosition(j+1, i + 2);
+                    char c = map[i][j];
+                    if (c == '.') c = ' ';
+                    else if (c == '#') c = '|';
+                    Console.Write(c);
+                }
             }
         }
-        Console.WriteLine();
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.SetCursorPosition(0, map.Length + 3);
     }
-    Console.Write($"iteration:{iteration} {dirrection.ToString()}\t");
+
+    previousFormationE = formationString;
 }
 
 int totalLoad(in char[][] map)
